@@ -4,7 +4,7 @@ name = "{% .ProjectName %}"
 version = "0.1.0"
 
 authors = [
-    { name = "Sato Seinosuke", email = "kxue43@gmail.com" },
+    { name = "Sato Seinosuke", email = "satoseino@gmail.com" },
 ]
 
 description = "{% .Description %}"

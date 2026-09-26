@@ -9,9 +9,9 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 
-	"github.com/kxue43/cli-toolkit/creds"
-	"github.com/kxue43/cli-toolkit/key"
-	"github.com/kxue43/cli-toolkit/terminal"
+	"github.com/satoseino/cli-toolkit/creds"
+	"github.com/satoseino/cli-toolkit/key"
+	"github.com/satoseino/cli-toolkit/terminal"
 )
 
 var (
@@ -111,7 +111,7 @@ func main() {
 		return
 	}
 
-	kp := key.NewKeyringProvider("kxue43.toolkit.assume-role", "cache-encryption-key")
+	kp := key.NewKeyringProvider("satoseino.toolkit.assume-role", "cache-encryption-key")
 
 	processor := creds.NewProcessor(input, tty, cfg, kp)
 

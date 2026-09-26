@@ -18,8 +18,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/kxue43/cli-toolkit/cipher"
-	"github.com/kxue43/cli-toolkit/terminal"
+	"github.com/satoseino/cli-toolkit/cipher"
+	"github.com/satoseino/cli-toolkit/terminal"
 )
 
 type (

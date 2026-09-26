@@ -9,7 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/kxue43/cli-toolkit/scaffold"
+	"github.com/satoseino/cli-toolkit/scaffold"
 )
 
 type (

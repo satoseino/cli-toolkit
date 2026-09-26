@@ -90,7 +90,7 @@ func TestProjects(t *testing.T) {
 	pypiVersion := "4.5.6"
 	npmVersion := "7.8.9"
 
-	mux.Handle("GET /kxue43/shell-cmd-on-change/releases/latest", handlerFactory(`{"tag_name": %q}`, shellCmdOnChangeTag))
+	mux.Handle("GET /satoseino/shell-cmd-on-change/releases/latest", handlerFactory(`{"tag_name": %q}`, shellCmdOnChangeTag))
 	mux.Handle("GET /{owner}/{repo}/releases/latest", handlerFactory(`{"tag_name": %q}`, genericGithubTag))
 	mux.Handle("GET /{name}/json", handlerFactory(`{"info": {"version": %q}}`, pypiVersion))
 
@@ -317,7 +317,7 @@ func TestProjects(t *testing.T) {
 			scanner.Scan()
 		}
 
-		assert.Equal(t, fmt.Sprintf(`    result = f"https://github.com/kxue43/%s/blob/main/{filename}.py{anchor}"`, cmd.ProjectName), scanner.Text())
+		assert.Equal(t, fmt.Sprintf(`    result = f"https://github.com/satoseino/%s/blob/main/{filename}.py{anchor}"`, cmd.ProjectName), scanner.Text())
 	})
 
 	t.Run("TsCdkProject", func(t *testing.T) {
@@ -406,7 +406,7 @@ func TestProjects(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, cmd.ProjectName, packageJson.Name)
-		assert.Equal(t, fmt.Sprintf("https://github.com/kxue43/%s", cmd.ProjectName), packageJson.Repository.Url)
+		assert.Equal(t, fmt.Sprintf("https://github.com/satoseino/%s", cmd.ProjectName), packageJson.Repository.Url)
 
 		for _, vs := range cmd.VersionSetters {
 			if version, ok := packageJson.DevDependencies[vs.Name]; ok {
@@ -445,7 +445,7 @@ func TestGetVersions(t *testing.T) {
 
 	mux.Handle("GET /black/json", handlerFactory("pypi", "black", blackVersion))
 	mux.Handle("GET /golangci/golangci-lint/releases/latest", handlerFactory("github", "golangci-lint", golangciLintVersion))
-	mux.Handle("GET /kxue43/shell-cmd-on-change/releases/latest", handlerFactory("github", "shell-cmd-on-change", shellCmdOnChangeVersion))
+	mux.Handle("GET /satoseino/shell-cmd-on-change/releases/latest", handlerFactory("github", "shell-cmd-on-change", shellCmdOnChangeVersion))
 	mux.Handle("GET /aws-cdk-lib", handlerFactory("npm", "aws-cdk-lib", awsCdkLibVersion))
 
 	ts := httptest.NewServer(mux)
@@ -479,7 +479,7 @@ func TestGetVersions(t *testing.T) {
 		require.NoError(t, err1)
 		assert.Equal(t, golangciLintVersion, v)
 
-		v, err1 = GitHubProjectLatestReleaseTag(context.Background(), "kxue43", "shell-cmd-on-change")
+		v, err1 = GitHubProjectLatestReleaseTag(context.Background(), "satoseino", "shell-cmd-on-change")
 
 		require.NoError(t, err1)
 		assert.Equal(t, shellCmdOnChangeVersion, v)

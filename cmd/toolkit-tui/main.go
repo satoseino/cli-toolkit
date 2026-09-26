@@ -5,8 +5,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/kxue43/cli-toolkit/scaffold"
-	"github.com/kxue43/cli-toolkit/tui"
+	"github.com/satoseino/cli-toolkit/scaffold"
+	"github.com/satoseino/cli-toolkit/tui"
 )
 
 func main() {
