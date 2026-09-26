@@ -6,7 +6,7 @@ The live-reload server relies on two executable Go programs. To use them, first 
 two commands.
 
 ```bash
-go install github.com/kxue43/cli-toolkit/cmd/toolkit-serve-static@latest
+go install github.com/satoseino/cli-toolkit/cmd/toolkit-serve-static@latest
 go install github.com/air-verse/air@latest
 ```
 

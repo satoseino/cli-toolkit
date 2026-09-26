@@ -5,7 +5,7 @@ repos:
       - id: ruff-check
       - id: ruff-format
 
-  - repo: https://github.com/kxue43/shell-cmd-on-change
+  - repo: https://github.com/satoseino/shell-cmd-on-change
     rev: "{% .ShellCmdOnChangeVersion %}"
     hooks:
       - id: shell-cmd-on-change

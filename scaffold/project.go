@@ -18,7 +18,7 @@ import (
 
 	"golang.org/x/mod/modfile"
 
-	"github.com/kxue43/cli-toolkit/jsonstream"
+	"github.com/satoseino/cli-toolkit/jsonstream"
 )
 
 type (
@@ -525,7 +525,7 @@ func (c *PythonProjectCmd) BeforeReset() error {
 		{Registry: PyPI, Name: "pytest-cov", Indirect: &c.PytestCovVersion},
 		{Registry: PyPI, Name: "Sphinx", Indirect: &c.SphinxVersion},
 		{Registry: GitHub, Scope: "godaddy", Name: "tartufo", Indirect: &c.TartufoVersion},
-		{Registry: GitHub, Scope: "kxue43", Name: "shell-cmd-on-change", Indirect: &c.ShellCmdOnChangeVersion},
+		{Registry: GitHub, Scope: "satoseino", Name: "shell-cmd-on-change", Indirect: &c.ShellCmdOnChangeVersion},
 	}
 
 	return nil

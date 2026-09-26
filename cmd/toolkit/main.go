@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/alecthomas/kong"
 
-	"github.com/kxue43/cli-toolkit/scaffold"
+	"github.com/satoseino/cli-toolkit/scaffold"
 )
 
 func main() {

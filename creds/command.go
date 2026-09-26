@@ -16,7 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 
-	"github.com/kxue43/cli-toolkit/terminal"
+	"github.com/satoseino/cli-toolkit/terminal"
 )
 
 type (

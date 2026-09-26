@@ -1,4 +1,4 @@
-module github.com/kxue43/cli-toolkit
+module github.com/satoseino/cli-toolkit
 
 go 1.24.1
 

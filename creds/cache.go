@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kxue43/cli-toolkit/cipher"
+	"github.com/satoseino/cli-toolkit/cipher"
 )
 
 type (

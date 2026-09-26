@@ -72,5 +72,5 @@ def linkcode_resolve(domain, info):
     obj = getattr(module, info["fullname"])
     anchor = f"#L{getsourcelines(obj)[1]}"
 
-    result = f"https://github.com/kxue43/{% .ProjectName %}/blob/main/{filename}.py{anchor}"
+    result = f"https://github.com/satoseino/{% .ProjectName %}/blob/main/{filename}.py{anchor}"
     return result
