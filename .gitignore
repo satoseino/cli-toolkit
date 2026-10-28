@@ -8,4 +8,3 @@ dist/**/*
 /temp*.yaml
 /toolkit
 /toolkit-*
-/messages.log
