@@ -13,9 +13,13 @@ section() {
 	printf '%s\n%s\n\n' "$1" "$(printf '%*s' "${#1}" '' | tr ' ' '=')"
 }
 
-modules=$(go list -deps -f '{{with .Module}}{{if not .Main}}{{.Path}} {{.Dir}}{{end}}{{end}}' \
-	./cmd/toolkit ./cmd/toolkit-assume-role ./cmd/toolkit-show-md ./cmd/toolkit-serve-static |
-	sort -u)
+# The dependency set differs per OS (go-keyring links shellescape on darwin and
+# godbus on linux), and every archive ships this one file, so list the union
+# over the shipped GOOS values (.goreleaser.yaml builds), not the host's.
+modules=$(for goos in darwin linux; do
+	GOOS=$goos go list -deps -f '{{with .Module}}{{if not .Main}}{{.Path}} {{.Dir}}{{end}}{{end}}' \
+		./cmd/toolkit ./cmd/toolkit-assume-role ./cmd/toolkit-show-md ./cmd/toolkit-serve-static
+done | sort -u)
 
 while read -r path dir; do
 	[[ -n $path ]] || continue
