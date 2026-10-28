@@ -8,3 +8,4 @@ dist/**/*
 /temp*.yaml
 /toolkit
 /toolkit-*
+/THIRD_PARTY_LICENSES

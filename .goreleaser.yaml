@@ -1,0 +1,89 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - ./scripts/third-party-licenses.sh
+
+# No Windows build: toolkit-assume-role needs /dev/tty, and Homebrew is
+# macOS/Linux only. The other builds reuse the first build's common keys.
+builds:
+  - id: toolkit
+    binary: toolkit
+    main: ./cmd/toolkit
+    env: &env
+      - CGO_ENABLED=0
+    goos: &goos
+      - darwin
+      - linux
+    goarch: &goarch
+      - amd64
+      - arm64
+    ldflags: &ldflags
+      - -s -w -X github.com/satoseino/cli-toolkit/version.stamped={{ .Version }}
+  - id: toolkit-assume-role
+    binary: toolkit-assume-role
+    main: ./cmd/toolkit-assume-role
+    env: *env
+    goos: *goos
+    goarch: *goarch
+    ldflags: *ldflags
+  - id: toolkit-show-md
+    binary: toolkit-show-md
+    main: ./cmd/toolkit-show-md
+    env: *env
+    goos: *goos
+    goarch: *goarch
+    ldflags: *ldflags
+  - id: toolkit-serve-static
+    binary: toolkit-serve-static
+    main: ./cmd/toolkit-serve-static
+    env: *env
+    goos: *goos
+    goarch: *goarch
+    ldflags: *ldflags
+
+# One archive per platform with all four binaries, so a single formula
+# installs them all; the brew pipe rejects more than one archive per OS/arch.
+archives:
+  - formats: [tar.gz]
+    files:
+      - LICENSE
+      - README.md
+      - THIRD_PARTY_LICENSES
+      # Keeps its path inside the archive, which extra_install relies on.
+      - completions/*
+
+checksum:
+  name_template: checksums.txt
+
+# brews, not homebrew_casks: casks quarantine installed binaries, and
+# Gatekeeper blocks the unsigned, un-notarized macOS builds. brews is
+# deprecated, so every release logs a warning; that is expected.
+brews:
+  - name: cli-toolkit
+    repository:
+      owner: satoseino
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Formula
+    homepage: https://github.com/satoseino/cli-toolkit
+    description: "Personal CLIs: project scaffolding, AWS credential_process, Markdown preview, static file server."
+    license: "Unlicense"
+    # Pre-release tags (v1.0.0-rc.1) don't update the tap.
+    skip_upload: auto
+    # Homebrew copies LICENSE and README.md into the keg on its own, but not
+    # THIRD_PARTY_LICENSES, whose notices must ship with the binaries.
+    extra_install: |
+      bash_completion.install "completions/toolkit.bash" => "toolkit"
+      zsh_completion.install "completions/toolkit.zsh" => "_toolkit"
+      fish_completion.install "completions/toolkit.fish"
+      prefix.install "THIRD_PARTY_LICENSES"
+    # kong prints --version to stdout; the flag-based binaries print -version
+    # to stderr.
+    test: |
+      assert_match version.to_s, shell_output("#{bin}/toolkit --version")
+      assert_match version.to_s, shell_output("#{bin}/toolkit-assume-role -version 2>&1")
+      assert_match version.to_s, shell_output("#{bin}/toolkit-show-md -version 2>&1")
+      assert_match version.to_s, shell_output("#{bin}/toolkit-serve-static -version 2>&1")
