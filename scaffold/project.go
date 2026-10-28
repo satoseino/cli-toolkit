@@ -66,6 +66,7 @@ type (
 		TypeScriptVersion       SemVer          `name:"typescript-version" default:"LATEST" help:"Version of typescript."`
 		AwsCdkAssertVersion     SemVer          `name:"aws-cdk-assert-version" default:"LATEST" help:"Version of aws-cdk-assert, a test dependency."`
 		YamlVersion             SemVer          `name:"yaml-version" default:"LATEST" help:"Version of yaml, a test dependency."`
+		GelatoVersion           SemVer          `name:"gelato-version" default:"LATEST" help:"Version of gelato, a pre-commit hook."`
 		NodejsVersion           NodejsVersion   `name:"nodejs-version" required:"" help:"Only accept major and minor version, i.e. the X.Y format."`
 		VersionSetters          []VersionSetter `kong:"-"`
 		TimeoutSeconds          int             `name:"timeout-seconds" default:"1" help:"Timeout scaffolding after this many seconds."`
@@ -583,6 +584,7 @@ func (c *TsCdkProjectCmd) BeforeReset() error {
 		{Registry: NPM, Name: "aws-cdk-lib", Indirect: &c.AwsCdkLibVersion},
 		{Registry: NPM, Name: "constructs", Indirect: &c.ConstructsVersion},
 		{Registry: NPM, Name: "yaml", Indirect: &c.YamlVersion},
+		{Registry: GitHub, Scope: "satoseino", Name: "gelato", Indirect: &c.GelatoVersion},
 	}
 
 	return nil

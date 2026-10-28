@@ -353,10 +353,15 @@ func TestProjects(t *testing.T) {
 
 		defer func() { _ = os.RemoveAll(tempDir) }()
 
-		original := npmAPIBURLPrefix
+		o1 := githubAPIURLPrefix
+		o2 := npmAPIBURLPrefix
+		githubAPIURLPrefix = ts.URL
 		npmAPIBURLPrefix = ts.URL
 
-		defer func() { npmAPIBURLPrefix = original }()
+		defer func() {
+			githubAPIURLPrefix = o1
+			npmAPIBURLPrefix = o2
+		}()
 
 		nodejsVersion := NodejsVersion{}
 		err = nodejsVersion.UnmarshalText([]byte("20.19"))
@@ -382,6 +387,7 @@ func TestProjects(t *testing.T) {
 			AwsCdkLibVersion:        SemVer{},
 			ConstructsVersion:       SemVer{},
 			YamlVersion:             SemVer{},
+			GelatoVersion:           SemVer{},
 			NodejsVersion:           nodejsVersion,
 			TimeoutSeconds:          5,
 		}
@@ -407,6 +413,7 @@ func TestProjects(t *testing.T) {
 			".prettierrc.json",
 			"cdk.json",
 			"eslint.config.js",
+			"tartufo.toml",
 			"tsconfig.json",
 			"vitest.config.ts",
 			filepath.Join("src", "main.ts"),
@@ -436,6 +443,10 @@ func TestProjects(t *testing.T) {
 		assert.Equal(t, fmt.Sprintf("https://github.com/satoseino/%s", cmd.ProjectName), packageJson.Repository.Url)
 
 		for _, vs := range cmd.VersionSetters {
+			if vs.Registry != NPM {
+				continue
+			}
+
 			if version, ok := packageJson.DevDependencies[vs.Name]; ok {
 				assert.Equal(t, "^"+npmVersion, version)
 			} else {
@@ -444,6 +455,17 @@ func TestProjects(t *testing.T) {
 		}
 
 		assert.Equal(t, fmt.Sprintf("^%s.0", cmd.NodejsVersion.String()), packageJson.DevDependencies["@types/node"])
+
+		contents, err = os.ReadFile(filepath.Clean(filepath.Join(tempDir, ".pre-commit-config.yaml")))
+		require.NoError(t, err)
+
+		var preCommitConfig PreCommitConfig
+
+		err = yaml.Unmarshal(contents, &preCommitConfig)
+		require.NoError(t, err)
+
+		assert.Equal(t, "https://github.com/satoseino/gelato", preCommitConfig.Repos[0].Repo)
+		assert.Equal(t, gelatoTag, preCommitConfig.Repos[0].Rev)
 	})
 }
 
