@@ -6,7 +6,9 @@ repos:
       - id: golangci-lint-full
       - id: golangci-lint-config-verify
 
-  - repo: https://github.com/godaddy/tartufo
-    rev: v6.0.0
+  # CI runs only the golangci-lint hooks by id (make lint), so gelato scans
+  # local commits only.
+  - repo: https://github.com/satoseino/gelato
+    rev: v0.1.0
     hooks:
-      - id: tartufo
+      - id: gelato

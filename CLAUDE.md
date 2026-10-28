@@ -63,8 +63,9 @@ To pin a new tool in a scaffold, add three things:
 - Run `pre-commit install -t pre-commit` before contributing.
 - Use the `Makefile` targets rather than calling `go test` / `golangci-lint` directly. `make all` (test + lint) is the default target and the bar for a change being done. `make fmt` auto-fixes formatting.
 - `golangci-lint` must pass. Suppress a false positive case by case in `.golangci.yaml` under `linters.exclusions.rules`, scoped to the specific `path` and `text`, with a comment explaining why. Never use a blanket `//nolint` or disable a linter. Exception: `govet`'s `fieldalignment` diagnostic encodes struct-specific byte counts, so it can't be pinned to a stable `text:` regex. Suppress it with an inline, linter-scoped `//nolint:govet // fieldalignment: ...` comment on the struct instead, explaining why the field order is intentional.
-- `tartufo` does secret scanning. Exclude false positives via `tartufo.toml`, not by skipping the hook.
-- Coding agents: never invoke the secret scanner yourself (`make lint-all` or a raw `pre-commit run ... tartufo`). It floods context for no benefit, and the git hook already enforces it.
+- [`gelato`](https://github.com/satoseino/gelato), a tartufo-compatible port, does secret scanning. It still reads `tartufo.toml`. Exclude false positives there, not by skipping the hook.
+- Coding agents: never invoke the secret scanner yourself (`make lint-all`, a raw `pre-commit run ... gelato`, or `gelato scan`). It floods context for no benefit, and the git hook already enforces it.
+- CI lints through pre-commit (cached), not through linters' own GitHub Actions, so each tool's version is pinned in one place (`.pre-commit-config.yaml`). gelato never runs in CI: a fresh checkout has nothing staged for `gelato pre-commit`, and `gelato scan` is too slow. The scaffold templates follow the same policy.
 - Import grouping (standard / third-party / this module, via `gci`) and other style rules are auto-fixed by the tooling. Run `make fmt` rather than hand-arranging imports.
 
 ## Error handling
