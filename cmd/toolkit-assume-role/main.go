@@ -12,10 +12,12 @@ import (
 	"github.com/satoseino/cli-toolkit/creds"
 	"github.com/satoseino/cli-toolkit/key"
 	"github.com/satoseino/cli-toolkit/terminal"
+	"github.com/satoseino/cli-toolkit/version"
 )
 
 var (
-	input = creds.ProcessInput{}
+	input       = creds.ProcessInput{}
+	showVersion bool
 
 	helpMsg = `Usage: %s -mfa-serial=STRING -profile=STRING [flags] <RoleArn>
 
@@ -34,6 +36,7 @@ func registerFlagsAndHelp() {
 	flag.StringVar(&input.Region, "region", "us-east-1", "The regional STS service endpoint to call.")
 	flag.StringVar(&input.RoleSessionName, "role-session-name", "ToolkitCLI", "Role session name.")
 	flag.Int64Var(&input.DurationSeconds, "duration-seconds", 3600, "Role session duration seconds.")
+	flag.BoolVar(&showVersion, "version", false, "Print the version and exit.")
 
 	flag.Usage = func() {
 		_, _ = fmt.Fprintf(flag.CommandLine.Output(), helpMsg, os.Args[0])
@@ -67,6 +70,18 @@ func main() {
 
 	defer func() { os.Exit(exitCode) }()
 
+	// Parse before opening /dev/tty so -version works without a controlling
+	// terminal. It prints to stderr because stdout carries only credentials.
+	registerFlagsAndHelp()
+
+	flag.Parse()
+
+	if showVersion {
+		_, _ = fmt.Fprintln(flag.CommandLine.Output(), version.String())
+
+		return
+	}
+
 	device, err := os.OpenFile("/dev/tty", os.O_RDWR|os.O_SYNC, 0600)
 	if err != nil {
 		exitCode = 1
@@ -82,10 +97,6 @@ func main() {
 			exitCode = 1
 		}
 	}()
-
-	registerFlagsAndHelp()
-
-	flag.Parse()
 
 	if args := flag.Args(); len(args) > 0 {
 		input.RoleArn = args[0]
