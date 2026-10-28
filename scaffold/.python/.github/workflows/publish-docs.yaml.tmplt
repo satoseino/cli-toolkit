@@ -3,11 +3,6 @@ name: Publish Documentation
 on:
   push:
     branches: ["main"]
-    paths:
-      - "docs/**"
-      - "src/**.py"
-      - "pyproject.toml"
-      - "uv.lock"
 
   workflow_dispatch:
 
@@ -31,15 +26,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version-file: "pyproject.toml"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v10.3.2
         with:
           enable-cache: true
 
@@ -50,13 +45,13 @@ jobs:
         run: uv run --directory=docs sphinx-build -M html . _build
 
       - name: Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v6
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: 'docs/_build/html'
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

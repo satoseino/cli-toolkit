@@ -4,20 +4,8 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "**/*.go"
-      - "go.mod"
-      - "go.sum"
-      - ".golangci.yaml"
-      - ".pre-commit-config.yaml"
 
   pull_request:
-    paths:
-      - "**/*.go"
-      - "go.mod"
-      - "go.sum"
-      - ".golangci.yaml"
-      - ".pre-commit-config.yaml"
 
   workflow_dispatch:
 
