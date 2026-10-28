@@ -150,9 +150,14 @@ func TestProjects(t *testing.T) {
 
 		assert.Equal(t, "^"+cmd.GoVersion, steps[1].With["go-version"])
 		assert.Equal(t, "make lint", steps[len(steps)-1].Run, "CI should lint through pre-commit, which skips gelato")
+		assert.Equal(t, "make verify", steps[len(steps)-2].Run, "CI should verify the golangci-lint config, as golangci-lint-action did")
 
 		for _, step := range steps {
 			assert.NotContains(t, step.Uses, "golangci-lint-action", "golangci-lint's version should be pinned only in .pre-commit-config.yaml")
+
+			if strings.HasPrefix(step.Uses, "actions/cache@") {
+				assert.Contains(t, step.With["key"], "steps.setup-go.outputs.go-version", "a cached golangci-lint build must not outlive the Go version it was built with")
+			}
 		}
 
 		contents, err = os.ReadFile(filepath.Clean(filepath.Join(tempDir, ".pre-commit-config.yaml")))
