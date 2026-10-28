@@ -6,7 +6,7 @@ entropy = true
 exclude-path-patterns = [
     {path-pattern = 'uv\.lock$', reason = 'Lock file with lots of digests'},
     {path-pattern = 'pyproject\.toml$', reason = 'Standard Python project config file'},
-    {path-pattern = 'tartufo\.toml$', reason = 'Tartufo config file'},
+    {path-pattern = 'tartufo\.toml$', reason = 'gelato config file'},
 ]
 
 exclude-signatures = [

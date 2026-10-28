@@ -4,11 +4,6 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - 'src/**.py'
-      - 'tests/**.py'
-      - 'pyproject.toml'
-      - 'uv.lock'
 
   workflow_call:
 
@@ -20,10 +15,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version-file: "pyproject.toml"
 
@@ -31,10 +26,13 @@ jobs:
         run: pip install pre-commit
 
       - name: Cache pre-commit environments
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-3|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
 
+      # gelato only scans staged changes, and a fresh checkout has none.
       - name: Run pre-commit hooks
+        env:
+          SKIP: gelato
         run: pre-commit run --show-diff-on-failure --color=never --all-files --hook-stage=pre-commit

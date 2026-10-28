@@ -5,24 +5,12 @@ on:
     branches:
       - main
 
-    paths:
-      - "**/*.go"
-      - "go.mod"
-      - "go.sum"
-      - ".golangci.yaml"
-      - "scaffold/data/**"
-      - "**/testdata/**"
-
   pull_request:
-    paths:
-      - "**/*.go"
-      - "go.mod"
-      - "go.sum"
-      - ".golangci.yaml"
-      - "scaffold/data/**"
-      - "**/testdata/**"
 
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test-and-lint:
@@ -30,17 +18,36 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        id: setup-go
+        uses: actions/setup-go@v7
         with:
           go-version: "^1.25"
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      # golangci-lint is built from source with the installed Go and refuses to run
+      # when that Go is older than go.mod targets, so key on the Go version too.
+      - name: Cache pre-commit environments
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ steps.setup-go.outputs.go-version }}-${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Run unit test
         run: make test
 
-      - name: Lint with golangci-lint
-        uses: golangci/golangci-lint-action@v8
-        with:
-          version: "v2.13.2"
+      - name: Verify golangci-lint config
+        run: make verify
+
+      # Runs only the golangci-lint-full hook, so gelato doesn't run in CI.
+      - name: Lint
+        run: make lint

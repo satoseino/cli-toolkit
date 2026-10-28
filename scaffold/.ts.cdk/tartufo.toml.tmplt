@@ -1,0 +1,13 @@
+[tool.tartufo]
+repo-path = "."
+regex = true
+entropy = true
+
+exclude-path-patterns = [
+    {path-pattern = 'package-lock\.json$', reason = 'Lock file with lots of integrity hashes'},
+    {path-pattern = 'tartufo\.toml$', reason = 'gelato config file'},
+]
+
+exclude-signatures = [
+    # {signature = "hash value", reason = "false positive of high entropy in <***>"},
+]

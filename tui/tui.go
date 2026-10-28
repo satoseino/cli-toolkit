@@ -301,7 +301,7 @@ func InitialPythonModel(cmd *scaffold.PythonProjectCmd) pythonDeps {
 	var ti textinput.Model
 
 	vss := cmd.VersionSetters
-	depItems := make([]depItem, len(vss)-1) // The last versionSetter tartufo is not a depItem.
+	depItems := make([]depItem, len(vss)-1) // The last versionSetter shell-cmd-on-change is not a depItem.
 
 	for i := range depItems {
 		ti = textinput.New()

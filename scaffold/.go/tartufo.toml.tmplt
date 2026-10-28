@@ -6,7 +6,7 @@ entropy = true
 exclude-path-patterns = [
     {path-pattern = 'go\.mod$', reason = 'go.mod file'},
     {path-pattern = 'go\.sum$', reason = 'go.sum file'},
-    {path-pattern = 'tartufo\.toml$', reason = 'Tartufo config file'},
+    {path-pattern = 'tartufo\.toml$', reason = 'gelato config file'},
 ]
 
 exclude-signatures = [

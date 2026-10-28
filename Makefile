@@ -17,7 +17,7 @@ lint:
 .PHONY: lint
 
 verify:
-	@pre-commit run --all-files golangci-lint-verify
+	@pre-commit run --all-files golangci-lint-config-verify
 .PHONY: verify
 
 fmt:
