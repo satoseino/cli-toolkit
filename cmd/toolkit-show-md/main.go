@@ -18,17 +18,25 @@ import (
 	"github.com/pkg/browser"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
+
+	"github.com/satoseino/cli-toolkit/version"
 )
 
 var (
 	logger = log.New(os.Stderr, "toolkit-show-md: ", 0)
 
-	helpMsg = `Usage: %s <PATH>
+	showVersion bool
+
+	helpMsg = `Usage: %s [flags] <PATH>
 
 Convert Markdown file to GitHub style HTML and display HTML in the default browser.
 
 Arguments:
   <PATH>    Path to the Markdown file to convert.
+
+Flags:
+  -version
+        Print the version and exit.
 `
 	//go:embed .github.style.tmplt
 	gitHubMarkdownTemplate []byte
@@ -157,11 +165,19 @@ func main() {
 
 	var err error
 
+	flag.BoolVar(&showVersion, "version", false, "Print the version and exit.")
+
 	flag.Usage = func() {
 		_, _ = fmt.Fprintf(flag.CommandLine.Output(), helpMsg, os.Args[0])
 	}
 
 	flag.Parse()
+
+	if showVersion {
+		_, _ = fmt.Fprintln(flag.CommandLine.Output(), version.String())
+
+		return
+	}
 
 	args := flag.Args()
 	if len(args) != 1 {

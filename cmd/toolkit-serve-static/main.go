@@ -6,12 +6,15 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/satoseino/cli-toolkit/version"
 )
 
 var (
-	port    string
-	logger  = log.New(os.Stderr, "toolkit-serve-static: ", 0)
-	helpMsg = `Usage: %s [flags] <DIR>
+	port        string
+	showVersion bool
+	logger      = log.New(os.Stderr, "toolkit-serve-static: ", 0)
+	helpMsg     = `Usage: %s [flags] <DIR>
 
 Serve static contents from the <DIR> folder.
 
@@ -24,6 +27,7 @@ Flags:
 
 func main() {
 	flag.StringVar(&port, "port", "8090", "HTTP port of the local static files server.")
+	flag.BoolVar(&showVersion, "version", false, "Print the version and exit.")
 
 	flag.Usage = func() {
 		_, _ = fmt.Fprintf(flag.CommandLine.Output(), helpMsg, os.Args[0])
@@ -32,6 +36,12 @@ func main() {
 	}
 
 	flag.Parse()
+
+	if showVersion {
+		_, _ = fmt.Fprintln(flag.CommandLine.Output(), version.String())
+
+		return
+	}
 
 	args := flag.Args()
 	if len(args) == 0 {
