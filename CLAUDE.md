@@ -18,11 +18,14 @@ Kong drives command structs through a three-phase DI lifecycle:
 
 To add a subcommand, define the command type in the package that owns its behavior and register it as a field with a `cmd:"" name:"<subcommand-name>" help:"..."` tag on the `cli` struct in `cmd/toolkit/main.go`.
 
-To pin a new tool in a scaffold, add three things:
+Shell completions for `toolkit` live in `completions/toolkit.{bash,zsh,fish}`. They are hand-written, not generated, and they hard-code every subcommand and flag name, with the `help:` text as the zsh and fish description. Any change to the CLI surface (a subcommand or flag added, renamed or removed) must update all three scripts in the same change. Nothing tests them against the kong model.
+
+To pin a new tool in a scaffold, add four things:
 
 - a `SemVer` field with `default:"LATEST"`
 - a matching `VersionSetter` entry in that command's `BeforeReset`
 - a route for it on the `httptest` mux in `TestProjects` if its URL doesn't already match a generic pattern
+- its `--<name>` flag in all three `completions/toolkit.*` scripts
 
 ## Scaffold templates
 
@@ -32,7 +35,7 @@ To pin a new tool in a scaffold, add three things:
 
 ## `tui` and `cmd/toolkit-tui`: intentional pre-MVP
 
-`tui` and `cmd/toolkit-tui` are a deliberately half-baked bubbletea TUI for the Python scaffold. Don't polish, refactor, extend or add tests for them unless asked. Do keep them compiling: `tui` embeds `scaffold.VersionSetter` and `cmd/toolkit-tui` calls `PythonProjectCmd.BeforeReset()` by hand, so changes to the scaffold's exported API must carry through there. `scripts/` holds throwaway dev-only `main` programs (`debug-tui`, `rename-files`) and is held to the same low bar.
+`tui` and `cmd/toolkit-tui` are a deliberately half-baked bubbletea TUI for the Python scaffold. Don't polish, refactor, extend or add tests for them unless asked. Do keep them compiling: `tui` embeds `scaffold.VersionSetter` and `cmd/toolkit-tui` calls `PythonProjectCmd.BeforeReset()` by hand, so changes to the scaffold's exported API must carry through there. `scripts/` holds release tooling that GoReleaser runs (`third-party-licenses.sh`), not Go code.
 
 ## Credentials (`toolkit-assume-role`)
 
@@ -41,7 +44,7 @@ To pin a new tool in a scaffold, add three things:
 
 ## Package layout and naming
 
-- No Go package folders that exist purely for organization. Every top-level package (`cipher`, `creds`, `jsonstream`, `key`, `scaffold`, `terminal`, `tui`) owns real behavior. This doesn't constrain non-Go asset directories such as the scaffold template trees or `scripts/`.
+- No Go package folders that exist purely for organization. Every top-level package (`cipher`, `creds`, `jsonstream`, `key`, `scaffold`, `terminal`, `tui`, `version`) owns real behavior. This doesn't constrain non-Go asset directories such as the scaffold template trees or `scripts/`.
 - Exported names read naturally with their package qualifier and don't stutter (`creds.Processor`, `key.KeyringProvider`, not `creds.CredsProcessor`). Read a new name back as `pkg.TypeName` before committing to it.
 
 ## Composition and interfaces
@@ -77,4 +80,8 @@ All new or changed exported identifiers require godoc-style comments.
 
 ## Release and distribution (GoReleaser / Homebrew)
 
-GoReleaser integration is planned. When `.goreleaser.yaml` is added, use GoReleaser's legacy `brews:` config, not the newer `homebrew_casks:`, and don't re-litigate this. Casks quarantine installed binaries (`com.apple.quarantine`), and Gatekeeper blocks quarantined unsigned binaries. This project doesn't code-sign or notarize macOS builds, so casks would break the `toolkit*` binaries on first run. `brews:` Formulae install unquarantined. Revisit only after adopting Apple Developer code signing + notarization, or if GoReleaser removes `brews:` outright.
+A `v*` tag runs `.github/workflows/release.yaml`, which runs GoReleaser with `.goreleaser.yaml`. One archive per platform holds `toolkit`, `toolkit-assume-role`, `toolkit-show-md` and `toolkit-serve-static`, so one `cli-toolkit` formula in `satoseino/homebrew-tap` installs all four, plus `toolkit`'s completions and `THIRD_PARTY_LICENSES`. `toolkit-tui` is not shipped. Every binary reports the `version` package's `-X`-stamped version (`toolkit --version`, `-version` for the others).
+
+The tap token is the `HOMEBREW_TAP_TOKEN` repository secret, a fine-grained PAT limited to Contents read/write on `satoseino/homebrew-tap`. When it expires, releases still publish, but the tap update fails.
+
+Use GoReleaser's legacy `brews:` config, not the newer `homebrew_casks:`, and don't re-litigate this. Casks quarantine installed binaries (`com.apple.quarantine`), and Gatekeeper blocks quarantined unsigned binaries. This project doesn't code-sign or notarize macOS builds, so casks would break the `toolkit*` binaries on first run. `brews:` Formulae install unquarantined. Revisit only after adopting Apple Developer code signing + notarization, or if GoReleaser removes `brews:` outright. `brews:` is gone in GoReleaser v3, so `goreleaser-action` stays pinned to `version: "~> v2"` while `brews:` exists.
