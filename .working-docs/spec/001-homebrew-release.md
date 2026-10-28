@@ -67,7 +67,7 @@ There are no Go tests tying the completion scripts to the kong model. As in `jar
 
 ### 5. `scripts/third-party-licenses.sh` (new; mode `100755`)
 
-This is gelato's script with `./cmd/gelato` replaced by the four `./cmd/...` packages in a single `go list -deps` call. It collects `LICENSE*`/`COPYING*`/`NOTICE*` per module, which picks up `aws-sdk-go-v2`'s `NOTICE.txt` and `smithy-go`'s `NOTICE`, and fails when a module or GOROOT has no license file. Add `/THIRD_PARTY_LICENSES` to `.gitignore`; `dist/**/*` is already ignored.
+This is gelato's script with `./cmd/gelato` replaced by the four `./cmd/...` packages in a `go list -deps` call, run once per shipped GOOS (`darwin`, `linux`) and merged with `sort -u`. The dependency set differs per OS (`zalando/go-keyring` links `al.essio.dev/pkg/shellescape` on darwin and `github.com/godbus/dbus/v5` on linux), and every archive ships the one file, so a host-only list would drop the other OS's notices. It collects `LICENSE*`/`COPYING*`/`NOTICE*` per module, which picks up `aws-sdk-go-v2`'s `NOTICE.txt` and `smithy-go`'s `NOTICE`, and fails when a module or GOROOT has no license file. Add `/THIRD_PARTY_LICENSES` to `.gitignore`; `dist/**/*` is already ignored.
 
 ### 6. `.goreleaser.yaml` (new; GoReleaser OSS, config `version: 2`)
 
@@ -141,7 +141,7 @@ gh secret set HOMEBREW_TAP_TOKEN --repo satoseino/cli-toolkit   # prompts for th
 - [ ] `HOMEBREW_TAP_TOKEN` is listed by `gh secret list --repo satoseino/cli-toolkit` before the first tag.
 - [ ] Each snapshot binary prints the snapshot version (`toolkit --version`, `-version` for the other three). `toolkit-assume-role -version` prints it with no controlling terminal (`setsid -w toolkit-assume-role -version` on Linux), and `toolkit-serve-static -version` and `toolkit-show-md -version` print it with no positional argument. `go version -m` shows `CGO_ENABLED=0`.
 - [ ] A `go install`-built `toolkit --version` prints a module version or `dev`, not an empty string.
-- [ ] `THIRD_PARTY_LICENSES` has a section per non-main module from `go list -deps` of the four `cmd/` packages (including the `NOTICE.txt` of `aws-sdk-go-v2` and the `NOTICE` of `smithy-go`), plus the Go standard library.
+- [ ] `THIRD_PARTY_LICENSES` has a section per non-main module from `go list -deps` of the four `cmd/` packages under both `GOOS=darwin` and `GOOS=linux`, whatever the host OS (including `al.essio.dev/pkg/shellescape` and `github.com/godbus/dbus/v5`, the `NOTICE.txt` of `aws-sdk-go-v2` and the `NOTICE` of `smithy-go`), plus the Go standard library.
 - [ ] `bash -n`, `zsh -n` and `fish --no-execute` accept the three scripts. In each shell, sourcing its script completes the subcommands, and `start-go-project --g<TAB>` completes `--gelato-version`, `--go-version` and `--golangci-lint-version`.
 - [ ] `scripts/` contains only `third-party-licenses.sh`, and `go mod tidy` on the committed tree leaves `go.mod`/`go.sum` unchanged (`git diff --exit-code go.mod go.sum`).
 - [ ] `make all` passes, including `version_test.go`.
