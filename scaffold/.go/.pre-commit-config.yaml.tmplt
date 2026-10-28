@@ -6,7 +6,7 @@ repos:
       - id: golangci-lint-fmt
       - id: golangci-lint-full
 
-  - repo: https://github.com/godaddy/tartufo
-    rev: v{% .TartufoVersion %}
+  - repo: https://github.com/satoseino/gelato
+    rev: v{% .GelatoVersion %}
     hooks:
-      - id: tartufo
+      - id: gelato

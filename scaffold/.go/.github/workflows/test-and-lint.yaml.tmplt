@@ -9,6 +9,7 @@ on:
       - "go.mod"
       - "go.sum"
       - ".golangci.yaml"
+      - ".pre-commit-config.yaml"
 
   pull_request:
     paths:
@@ -16,8 +17,12 @@ on:
       - "go.mod"
       - "go.sum"
       - ".golangci.yaml"
+      - ".pre-commit-config.yaml"
 
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test-and-lint:
@@ -25,17 +30,30 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           go-version: "^{% .GoVersion %}"
-      
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Cache pre-commit environments
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+
       - name: Run unit test
         run: make test
 
-      - name: Lint with golangci-lint
-        uses: golangci/golangci-lint-action@v8
-        with:
-          version: v{% .GolangcilintVersion %}
+      # Runs only the golangci-lint-full hook, so gelato doesn't run in CI.
+      - name: Lint
+        run: make lint

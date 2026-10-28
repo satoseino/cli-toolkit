@@ -28,9 +28,9 @@ lint-all:
 	@pre-commit run --all-files
 .PHONY: all
 
-tartufo:
-	@pre-commit run tartufo
-.PHONY: tartufo
+gelato:
+	@pre-commit run gelato
+.PHONY: gelato
 
 all: test lint
 .PHONY: all

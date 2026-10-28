@@ -25,8 +25,10 @@ type (
 			RunsOn string `yaml:"runs-on"`
 			Steps  []struct {
 				With map[string]string `yaml:"with"`
+				Env  map[string]string `yaml:"env"`
 				Name string            `yaml:"name"`
 				Uses string            `yaml:"uses"`
+				Run  string            `yaml:"run"`
 			}
 		} `yaml:"jobs"`
 	}
@@ -87,10 +89,12 @@ func TestProjects(t *testing.T) {
 
 	genericGithubTag := "v1.2.3"
 	shellCmdOnChangeTag := "2.1.0"
+	gelatoTag := "v0.9.8"
 	pypiVersion := "4.5.6"
 	npmVersion := "7.8.9"
 
 	mux.Handle("GET /satoseino/shell-cmd-on-change/releases/latest", handlerFactory(`{"tag_name": %q}`, shellCmdOnChangeTag))
+	mux.Handle("GET /satoseino/gelato/releases/latest", handlerFactory(`{"tag_name": %q}`, gelatoTag))
 	mux.Handle("GET /{owner}/{repo}/releases/latest", handlerFactory(`{"tag_name": %q}`, genericGithubTag))
 	mux.Handle("GET /{name}/json", handlerFactory(`{"info": {"version": %q}}`, pypiVersion))
 
@@ -119,7 +123,7 @@ func TestProjects(t *testing.T) {
 			ModulePath:          "module-path",
 			GoVersion:           "1.24.5",
 			GolangcilintVersion: SemVer{},
-			TartufoVersion:      SemVer{},
+			GelatoVersion:       SemVer{},
 			TimeoutSeconds:      5,
 		}
 
@@ -142,8 +146,14 @@ func TestProjects(t *testing.T) {
 		err = yaml.Unmarshal(contents, &workflow)
 		require.NoError(t, err)
 
-		assert.Equal(t, "^"+cmd.GoVersion, workflow.Jobs["test-and-lint"].Steps[1].With["go-version"])
-		assert.Equal(t, genericGithubTag, workflow.Jobs["test-and-lint"].Steps[len(workflow.Jobs["test-and-lint"].Steps)-1].With["version"])
+		steps := workflow.Jobs["test-and-lint"].Steps
+
+		assert.Equal(t, "^"+cmd.GoVersion, steps[1].With["go-version"])
+		assert.Equal(t, "make lint", steps[len(steps)-1].Run, "CI should lint through pre-commit, which skips gelato")
+
+		for _, step := range steps {
+			assert.NotContains(t, step.Uses, "golangci-lint-action", "golangci-lint's version should be pinned only in .pre-commit-config.yaml")
+		}
 
 		contents, err = os.ReadFile(filepath.Clean(filepath.Join(tempDir, ".pre-commit-config.yaml")))
 		require.NoError(t, err)
@@ -154,7 +164,9 @@ func TestProjects(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, genericGithubTag, preCommitConfig.Repos[0].Rev)
-		assert.Equal(t, genericGithubTag, preCommitConfig.Repos[1].Rev)
+		assert.Equal(t, "https://github.com/satoseino/gelato", preCommitConfig.Repos[1].Repo)
+		assert.Equal(t, gelatoTag, preCommitConfig.Repos[1].Rev)
+		assert.Equal(t, "gelato", preCommitConfig.Repos[1].Hooks[0].Id)
 
 		for _, hook := range preCommitConfig.Repos[0].Hooks {
 			assert.True(t, strings.HasPrefix(hook.Id, "golangci-lint-"))
@@ -207,7 +219,7 @@ func TestProjects(t *testing.T) {
 		cmd := PythonProjectCmd{
 			ProjectName:             "fs-walk",
 			Description:             "description",
-			TartufoVersion:          SemVer{},
+			GelatoVersion:           SemVer{},
 			ShellCmdOnChangeVersion: SemVer{},
 			MypyVersion:             mypyVersion,
 			PytestVersion:           SemVer{},
@@ -241,7 +253,22 @@ func TestProjects(t *testing.T) {
 
 		assert.Equal(t, "v"+pypiVersion, preCommitConfig.Repos[0].Rev, "the ruff-pre-commit repo should have the right rev field")
 		assert.Equal(t, shellCmdOnChangeTag, preCommitConfig.Repos[1].Rev, "the shell-cmd-on-change repo should have the right rev field")
-		assert.Equal(t, genericGithubTag, preCommitConfig.Repos[2].Rev, "the tartufo repo should have the right rev field")
+		assert.Equal(t, "https://github.com/satoseino/gelato", preCommitConfig.Repos[2].Repo)
+		assert.Equal(t, gelatoTag, preCommitConfig.Repos[2].Rev, "the gelato repo should have the right rev field")
+
+		contents, err = os.ReadFile(filepath.Clean(filepath.Join(tempDir, ".github", "workflows", "python-lint-on-pr.yaml")))
+		require.NoError(t, err)
+
+		var workflow Workflow
+
+		err = yaml.Unmarshal(contents, &workflow)
+		require.NoError(t, err)
+
+		steps := workflow.Jobs["lint"].Steps
+		lastStep := steps[len(steps)-1]
+
+		assert.Contains(t, lastStep.Run, "pre-commit run")
+		assert.Equal(t, "gelato", lastStep.Env["SKIP"], "gelato should not run in CI")
 
 		contents, err = os.ReadFile(filepath.Clean(filepath.Join(tempDir, "pyproject.toml")))
 		require.NoError(t, err)

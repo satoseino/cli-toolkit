@@ -9,6 +9,7 @@ on:
       - 'tests/**.py'
       - 'pyproject.toml'
       - 'uv.lock'
+      - '.pre-commit-config.yaml'
 
   workflow_call:
 
@@ -36,5 +37,8 @@ jobs:
           path: ~/.cache/pre-commit
           key: pre-commit-3|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
 
+      # gelato only scans staged changes, and a fresh checkout has none.
       - name: Run pre-commit hooks
+        env:
+          SKIP: gelato
         run: pre-commit run --show-diff-on-failure --color=never --all-files --hook-stage=pre-commit

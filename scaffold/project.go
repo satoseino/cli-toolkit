@@ -27,7 +27,7 @@ type (
 		ModulePath          string          `arg:"" required:"" name:"ModulePath" help:"Module path for the project."`
 		GoVersion           string          `name:"go-version" default:"1.24.1" help:"Will appear in go.mod and GitHub Actions workflow."`
 		GolangcilintVersion SemVer          `name:"golangci-lint-version" default:"LATEST" help:"Version of golangci-lint, a pre-commit hook."`
-		TartufoVersion      SemVer          `name:"tartufo-version" default:"LATEST" help:"Version of tartufo, a pre-commit hook."`
+		GelatoVersion       SemVer          `name:"gelato-version" default:"LATEST" help:"Version of gelato, a pre-commit hook."`
 		VersionSetters      []VersionSetter `kong:"-"`
 		TimeoutSeconds      int             `name:"timeout-seconds" default:"1" help:"Timeout scaffolding after this many seconds."`
 	}
@@ -36,7 +36,7 @@ type (
 		rootDir                 string
 		ProjectName             string          `arg:"" required:"" name:"ProjectName" help:"Python project name."`
 		Description             string          `name:"description" default:"PLACEHOLDER" help:"Short description of the project"`
-		TartufoVersion          SemVer          `name:"tartufo-version" default:"LATEST" help:"Version of tartufo, a pre-commit hook."`
+		GelatoVersion           SemVer          `name:"gelato-version" default:"LATEST" help:"Version of gelato, a pre-commit hook."`
 		ShellCmdOnChangeVersion SemVer          `name:"shell-cmd-on-change-version" default:"LATEST" help:"Version of shell-cmd-on-change, a post-merge hook."`
 		RuffVersion             SemVer          `name:"ruff-version" default:"LATEST" help:"Version of ruff, a linting dependency."`
 		MypyVersion             SemVer          `name:"mypy-version" default:"LATEST" help:"Version of mypy, a linting dependency."`
@@ -483,7 +483,7 @@ func setVersions(ctx context.Context, fns []setterFunc) error {
 func (c *GoProjectCmd) BeforeReset() error {
 	c.VersionSetters = []VersionSetter{
 		{Registry: GitHub, Scope: "golangci", Name: "golangci-lint", Indirect: &c.GolangcilintVersion},
-		{Registry: GitHub, Scope: "godaddy", Name: "tartufo", Indirect: &c.TartufoVersion},
+		{Registry: GitHub, Scope: "satoseino", Name: "gelato", Indirect: &c.GelatoVersion},
 	}
 
 	return nil
@@ -524,7 +524,7 @@ func (c *PythonProjectCmd) BeforeReset() error {
 		{Registry: PyPI, Name: "pytest-mock", Indirect: &c.PytestMockVersion},
 		{Registry: PyPI, Name: "pytest-cov", Indirect: &c.PytestCovVersion},
 		{Registry: PyPI, Name: "Sphinx", Indirect: &c.SphinxVersion},
-		{Registry: GitHub, Scope: "godaddy", Name: "tartufo", Indirect: &c.TartufoVersion},
+		{Registry: GitHub, Scope: "satoseino", Name: "gelato", Indirect: &c.GelatoVersion},
 		{Registry: GitHub, Scope: "satoseino", Name: "shell-cmd-on-change", Indirect: &c.ShellCmdOnChangeVersion},
 	}
 
